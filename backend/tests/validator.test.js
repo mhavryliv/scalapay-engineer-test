@@ -19,9 +19,9 @@ test('Invalid order: 1 top-level field missing', () => {
   delete order.totalAmount;
   const res = validator.validate(order);
   expect(res.valid).toBe(false);
-  expect(res.errors.length).toBe(1);
-  expect(res.errors[0].field).toBe('totalAmount');
-  expect(res.errors[0].msg).toBe(validator.ErrMsgMissingField);
+  expect(res.errors.summary.length).toBe(1);
+  expect(res.errors.summary[0].field).toBe('totalAmount');
+  expect(res.errors.summary[0].msg).toBe(validator.ErrMsgMissingField);
 });
 
 test('Invalid order: 1 child field missing', () => {
@@ -29,9 +29,9 @@ test('Invalid order: 1 child field missing', () => {
   delete order.totalAmount.amount;
   const res = validator.validate(order);
   expect(res.valid).toBe(false);
-  expect(res.errors.length).toBe(1);
-  expect(res.errors[0].field).toBe('totalAmount.amount');
-  expect(res.errors[0].msg).toBe(validator.ErrMsgMissingField);
+  expect(res.errors.summary.length).toBe(1);
+  expect(res.errors.summary[0].field).toBe('totalAmount.amount');
+  expect(res.errors.summary[0].msg).toBe(validator.ErrMsgMissingField);
 });
 
 test('Invalid order: String value exceeds max', () => {
@@ -41,9 +41,9 @@ test('Invalid order: String value exceeds max', () => {
   order.shipping.line1 = longStr;
   const res = validator.validate(order);
   expect(res.valid).toBe(false);
-  expect(res.errors.length).toBe(1);
-  expect(res.errors[0].field).toBe('shipping.line1');
-  expect(res.errors[0].msg).toBe(validator.ErrMsgFieldInvalid);
+  expect(res.errors.summary.length).toBe(1);
+  expect(res.errors.summary[0].field).toBe('shipping.line1');
+  expect(res.errors.summary[0].msg).toBe(validator.ErrMsgFieldInvalid);
 });
 
 test('Invalid order: Invalide currency code', () => {
@@ -51,9 +51,9 @@ test('Invalid order: Invalide currency code', () => {
   order.totalAmount.currency = "AUSD";
   const res = validator.validate(order);
   expect(res.valid).toBe(false);
-  expect(res.errors.length).toBe(1);
-  expect(res.errors[0].field).toBe('totalAmount.currency');
-  expect(res.errors[0].msg).toBe(validator.ErrMsgFieldInvalid);
+  expect(res.errors.summary.length).toBe(1);
+  expect(res.errors.summary[0].field).toBe('totalAmount.currency');
+  expect(res.errors.summary[0].msg).toBe(validator.ErrMsgFieldInvalid);
 });
 
 // test('Invalid order: Items missing price, and price amount', () => {
@@ -68,20 +68,18 @@ test('Invalid order: Invalide currency code', () => {
 //   expect(res.errors[0].msg).toBe(validator.ErrMsgFieldInvalid);
 //   expect(res.errors[1].field).toBe('totalAmount.currency');
 //   expect(res.errors[1].msg).toBe(validator.ErrMsgFieldInvalid);
+// });
+
+// test('Invalid order: Item quantity invalid', () => {
 
 // });
 
-test('Invalid order: Item quantity invalid', () => {
+// test('Invalid order: Random errors', () => {
+//   const requiredSummaryObjects = validator.requiredSummaryObjects;
+//   const requiredItemPurchaseInfo = validator.requiredItemPurchaseInfo;
 
-});
-
-test('Invalid order: Random errors', () => {
-  const requiredSummaryObjects = validator.requiredSummaryObjects;
-  const requiredItemPurchaseInfo = validator.requiredItemPurchaseInfo;
-
-  // Build an order, then delete or set invalid data for random fields
-
-});
+//   // Build an order, then delete or set invalid data for random fields
+// });
 
 /*
 Utility function to build orders for testing the validator

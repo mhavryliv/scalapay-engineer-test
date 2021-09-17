@@ -5,6 +5,7 @@
 // Maximum string length for any field, as a default safety check
 const MaxStrLen = 50;
 
+// Error messages
 const ErrMsgMissingField = "Missing data";
 const ErrMsgFieldInvalid = "Invalid data";
 
@@ -58,11 +59,25 @@ const validate = (order) => {
   const summaryErrors = checkSummaryInformation(order);
 
   // Check the individual purchase items
-  // const itemErrors = checkPurchaseItemsInformation(order);
+  const itemErrors = checkPurchaseItemsInformation(order);
+  // Go through the item errors and note if there are any
+  let anyItemErrors = false;
+  for(let i = 0; i < itemErrors.length; ++i) {
+    if(itemErrors[i].length !== 0) {
+      anyItemErrors = true;
+      break;
+    }
+  }
 
-  const errors = summaryErrors;
+  // Build the returned error object
+  let errors = {
+    summary: summaryErrors
+  }
+  if(anyItemErrors) {
+    errors.itemErrors = itemErrors;
+  }
 
-  if(errors.length !== 0) {
+  if(errors.summary.length !== 0 || errors.itemErrors) {
     return {
       valid: false,
       errors: errors
@@ -89,14 +104,14 @@ const checkPurchaseItemsInformation = (order) => {
   // Iterate through all the items in the order, and in an inner loop
   // check each of their fields for validation against the required fields
   items.forEach(item => {
-    requiredItemPurchaseInfo.forEach(requiredField => {
-      if(!item[requiredField.name]) {
-
-      }
-    });
+    let itemErrors = objectFieldValidator(item, requiredItemPurchaseInfo);
+    // Go through the item errors and add this items index
+    // Add this to the errors array - doesn't matter if these are empty,
+    // we want the structure of the error array to match the order structure
+    errors.push(itemErrors);
   });
 
-
+  return errors;
 }
 
 /*
@@ -107,39 +122,6 @@ const checkSummaryInformation = (order) => {
   // Keep record of errors
   let errors = objectFieldValidator(order, requiredSummaryObjects);
 
-  return errors;
-
-  // Check for all required field objects
-  requiredSummaryObjects.forEach(fieldObj => {
-    // Check the order contains an object for this field object
-    if(!order[fieldObj.name]) {
-      errors.push({field: fieldObj.name, msg: ErrMsgMissingField})
-      return;
-    }
-    const orderObj = order[fieldObj.name];
-    // If this field object has no child fields, simply check it's validity and 
-    // continue the loop
-    if(!fieldObj.fields) {
-      if(!isValid(fieldObj, orderObj)) {
-        errors.push({field: fieldObj.name, msg: ErrMsgFieldInvalid})
-        return;
-      }
-    }
-    // Else, loop through the field's child fields and check their existence and validity
-    fieldObj.fields.forEach(childField => {
-      const orderChildVal = orderObj[childField.name];
-      // If the order doesn't contain the required child field, add and error and continue
-      if(!orderChildVal) {
-        errors.push({field: fieldObj.name + "." + childField.name, msg: ErrMsgMissingField})
-        return;
-      }
-      // Check the chield field's validity
-      if(!isValid(childField, orderChildVal)) {
-        errors.push({field: fieldObj.name + "." + childField.name, msg: ErrMsgFieldInvalid})
-        return;
-      }
-    });
-  });
   return errors;
 }
 
@@ -165,8 +147,8 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
     if(!fieldObj.fields) {
       if(!isValid(fieldObj, objectRef)) {
         errors.push({field: fieldObj.name, msg: ErrMsgFieldInvalid})
-        return;
       }
+      return;
     }
     // Else, loop through the field's child fields and check their existence and validity
     fieldObj.fields.forEach(childField => {
