@@ -2,7 +2,7 @@ const validator = require('../lib/validator');
 
 // Sanity checks of the validator
 test('Empty data is invalid', () => {
-  const res = validator.validate({});
+  const res = validator.validateOrder({});
   expect(res.valid).toBe(false);
   console.log(res.errors);
 });
@@ -10,14 +10,14 @@ test('Empty data is invalid', () => {
 // Test with a valid order
 test('Valid order', () => {
   const order = buildOrder();
-  const res = validator.validate(order);
+  const res = validator.validateOrder(order);
   expect(res.valid).toBe(true);
 });
 
 test('Invalid order: 1 top-level field missing', () => {
   const order = buildOrder();
   delete order.totalAmount;
-  const res = validator.validate(order);
+  const res = validator.validateOrder(order);
   expect(res.valid).toBe(false);
   expect(res.errors.summary.length).toBe(1);
   expect(res.errors.summary[0].field).toBe('totalAmount');
@@ -27,7 +27,7 @@ test('Invalid order: 1 top-level field missing', () => {
 test('Invalid order: 1 child field missing', () => {
   const order = buildOrder();
   delete order.totalAmount.amount;
-  const res = validator.validate(order);
+  const res = validator.validateOrder(order);
   expect(res.valid).toBe(false);
   expect(res.errors.summary.length).toBe(1);
   expect(res.errors.summary[0].field).toBe('totalAmount.amount');
@@ -39,7 +39,7 @@ test('Invalid order: String value exceeds max', () => {
   let longStr = "12345678901234567890";
   longStr = longStr + longStr + longStr + longStr;
   order.shipping.line1 = longStr;
-  const res = validator.validate(order);
+  const res = validator.validateOrder(order);
   expect(res.valid).toBe(false);
   expect(res.errors.summary.length).toBe(1);
   expect(res.errors.summary[0].field).toBe('shipping.line1');
@@ -49,37 +49,49 @@ test('Invalid order: String value exceeds max', () => {
 test('Invalid order: Invalide currency code', () => {
   const order = buildOrder();
   order.totalAmount.currency = "AUSD";
-  const res = validator.validate(order);
+  const res = validator.validateOrder(order);
   expect(res.valid).toBe(false);
   expect(res.errors.summary.length).toBe(1);
   expect(res.errors.summary[0].field).toBe('totalAmount.currency');
   expect(res.errors.summary[0].msg).toBe(validator.ErrMsgFieldInvalid);
 });
 
-// test('Invalid order: Items missing price, and price amount', () => {
-//   // Build an order with at least 2 items
-//   const order = buildOrder(2);
-//   delete order.items[0].price.amount;
-//   delete order.items[1].price;
-//   const res = validator.validate(order);
-//   expect(res.valid).toBe(false);
-//   expect(res.errors.length).toBe(2);
-//   expect(res.errors[0].field).toBe('totalAmount.currency');
-//   expect(res.errors[0].msg).toBe(validator.ErrMsgFieldInvalid);
-//   expect(res.errors[1].field).toBe('totalAmount.currency');
-//   expect(res.errors[1].msg).toBe(validator.ErrMsgFieldInvalid);
-// });
+test('Invalid order: Items missing price, and price amount', () => {
+  // Build an order with at least 5 items
+  const order = buildOrder(5);
+  // Invalidate items 0 and 3
+  delete order.items[0].price.amount;
+  delete order.items[3].price;
+  const res = validator.validateOrder(order);
+  expect(res.valid).toBe(false);
+  const itemErrors = res.errors.items;
+  expect(itemErrors.length).toBe(2);
+  expect(itemErrors[0].itemIndex).toBe(0);
+  expect(itemErrors[0].errors[0].field).toBe('price.amount');
+  expect(itemErrors[0].errors[0].msg).toBe(validator.ErrMsgMissingField);
+  expect(itemErrors[1].itemIndex).toBe(3);
+  expect(itemErrors[1].errors[0].field).toBe('price');
+  expect(itemErrors[1].errors[0].msg).toBe(validator.ErrMsgMissingField);
+});
 
-// test('Invalid order: Item quantity invalid', () => {
+test('Invalid order: Item quantity, and sku invalid', () => {
+  const order = buildOrder(1);
+  order.items[0].quantity = -1;
+  let longStr = "12345678901234567890";
+  longStr = longStr + longStr + longStr + longStr;
+  order.items[0].sku = longStr;
+  const res = validator.validateOrder(order);
+  expect(res.valid).toBe(false);
+  const itemErrors = res.errors.items;
+  expect(itemErrors.length).toBe(1);
+  expect(itemErrors[0].itemIndex).toBe(0);
+  expect(itemErrors[0].errors.length).toBe(2);
+  expect(itemErrors[0].errors[0].field).toBe('quantity');
+  expect(itemErrors[0].errors[0].msg).toBe(validator.ErrMsgFieldInvalid);
+  expect(itemErrors[0].errors[1].field).toBe('sku');
+  expect(itemErrors[0].errors[1].msg).toBe(validator.ErrMsgFieldInvalid);
+});
 
-// });
-
-// test('Invalid order: Random errors', () => {
-//   const requiredSummaryObjects = validator.requiredSummaryObjects;
-//   const requiredItemPurchaseInfo = validator.requiredItemPurchaseInfo;
-
-//   // Build an order, then delete or set invalid data for random fields
-// });
 
 /*
 Utility function to build orders for testing the validator

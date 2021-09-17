@@ -54,30 +54,19 @@ const isValid = (field, val) => {
   Returns a JSON object with valid: true, or valid: false with a list of fields
   and problems.
 */
-const validate = (order) => {
+const validateOrder = (order) => {
   // Check the toplevel items in the order
   const summaryErrors = checkSummaryInformation(order);
 
   // Check the individual purchase items
   const itemErrors = checkPurchaseItemsInformation(order);
-  // Go through the item errors and note if there are any
-  let anyItemErrors = false;
-  for(let i = 0; i < itemErrors.length; ++i) {
-    if(itemErrors[i].length !== 0) {
-      anyItemErrors = true;
-      break;
-    }
-  }
 
   // Build the returned error object
   let errors = {
-    summary: summaryErrors
+    summary: summaryErrors,
+    items: itemErrors
   }
-  if(anyItemErrors) {
-    errors.itemErrors = itemErrors;
-  }
-
-  if(errors.summary.length !== 0 || errors.itemErrors) {
+  if(errors.summary.length !== 0 || errors.items.length !== 0) {
     return {
       valid: false,
       errors: errors
@@ -103,14 +92,14 @@ const checkPurchaseItemsInformation = (order) => {
 
   // Iterate through all the items in the order, and in an inner loop
   // check each of their fields for validation against the required fields
-  items.forEach(item => {
-    let itemErrors = objectFieldValidator(item, requiredItemPurchaseInfo);
-    // Go through the item errors and add this items index
-    // Add this to the errors array - doesn't matter if these are empty,
-    // we want the structure of the error array to match the order structure
-    errors.push(itemErrors);
-  });
-
+  for(let i = 0; i < items.length; ++i) {
+    let itemErrors = objectFieldValidator(items[i], requiredItemPurchaseInfo);
+    // If there are errors, add it to the error list with an additional field
+    // noting which item this is
+    if(itemErrors.length !== 0) {
+      errors.push({itemIndex: i, errors: itemErrors});
+    }
+  }
   return errors;
 }
 
@@ -169,7 +158,7 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
 }
 
 
-exports.validate = validate;
+exports.validateOrder = validateOrder;
 
 // Export these to help build test cases
 exports.ErrMsgFieldInvalid = ErrMsgFieldInvalid;
