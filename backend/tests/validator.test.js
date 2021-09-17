@@ -4,14 +4,19 @@ import * as validator from './../lib/validator.js'
 test('Empty data is invalid', () => {
   const res = validator.validateOrder({});
   expect(res.valid).toBe(false);
-  console.log(res.errors);
 });
 
 // Test with a valid order
 test('Valid order', () => {
-  const order = buildOrder();
+  const order = buildOrder(1);
   const res = validator.validateOrder(order);
   expect(res.valid).toBe(true);
+});
+
+test('Invalid order: No items', () => {
+  const order = buildOrder(0);
+  const res = validator.validateOrder(order);
+  expect(res.valid).toBe(false);
 });
 
 test('Invalid order: 1 top-level field missing', () => {

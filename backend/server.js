@@ -1,13 +1,18 @@
 import fetch from 'node-fetch'
 import express from 'express'
+import bodyParser from 'body-parser'
 import { validateOrder } from './lib/validator.js'
 const app = express()
+app.use(bodyParser.json())
+
 const port = 8123
 
-app.get('/', (req, res) => {
+app.post('/order', (req, res) => {
   const order = req.body;
-  // const validateResult = validator.validateOrder(req.body);
+  const validateResult = validateOrder(req.body);
+  console.log(validateResult);
 
+  res.send(validateResult);
 })
 
 app.listen(port, () => {

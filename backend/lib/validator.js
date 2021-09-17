@@ -6,6 +6,8 @@
 const MaxStrLen = 50;
 
 // Error messages
+const ErrMsgNoOrder = "Missing order";
+const ErrMsgNoItems = "No items";
 const ErrMsgMissingField = "Missing data";
 const ErrMsgFieldInvalid = "Invalid data";
 
@@ -43,8 +45,15 @@ const isValid = (field, val) => {
     const res = field.isValid(val);
     return res;
   }
+  // otherwise, test for string length and sanitisation
   else {
-    return val.length <= MaxStrLen;
+    if(val.length > MaxStrLen) {
+      return false;
+    }
+    // We should also sanitise the string here, but I don't know 
+    // what is the best library for this (and am assuming that Scalapay endpoint
+    // is also sanitising...) I would ask a colleague for advice on this.
+    return true;
   }
 }
 
@@ -55,11 +64,21 @@ const isValid = (field, val) => {
   and problems.
 */
 const validateOrder = (order) => {
+  if(!order) {
+    return {
+      valid: false,
+      errors: [{field: 'order', msg: ErrMsgNoOrder}]
+    }
+  }
   // Check the toplevel items in the order
   const summaryErrors = checkSummaryInformation(order);
 
-  // Check the individual purchase items
   const itemErrors = checkPurchaseItemsInformation(order);
+
+  // If there were no items, add this as an error
+  if(!order.items || order.items.length === 0) {
+    itemErrors.push({field: 'items', msg: ErrMsgNoItems});
+  }
 
   // Build the returned error object
   let errors = {
@@ -110,7 +129,6 @@ Returns an array of errors - if there are no errors, this will be an empty array
 const checkSummaryInformation = (order) => {
   // Keep record of errors
   let errors = objectFieldValidator(order, requiredSummaryObjects);
-
   return errors;
 }
 
