@@ -157,11 +157,4 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
   return errors;
 }
 
-
-exports.validateOrder = validateOrder;
-
-// Export these to help build test cases
-exports.ErrMsgFieldInvalid = ErrMsgFieldInvalid;
-exports.ErrMsgMissingField = ErrMsgMissingField;
-exports.requiredSummaryObjects = requiredSummaryObjects;
-exports.requiredItemPurchaseInfo = requiredItemPurchaseInfo;
+export {validateOrder, ErrMsgFieldInvalid, ErrMsgMissingField};

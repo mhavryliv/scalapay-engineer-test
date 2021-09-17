@@ -1,4 +1,4 @@
-const validator = require('../lib/validator');
+import * as validator from './../lib/validator.js'
 
 // Sanity checks of the validator
 test('Empty data is invalid', () => {
@@ -46,7 +46,7 @@ test('Invalid order: String value exceeds max', () => {
   expect(res.errors.summary[0].msg).toBe(validator.ErrMsgFieldInvalid);
 });
 
-test('Invalid order: Invalide currency code', () => {
+test('Invalid order: Invalid currency code', () => {
   const order = buildOrder();
   order.totalAmount.currency = "AUSD";
   const res = validator.validateOrder(order);

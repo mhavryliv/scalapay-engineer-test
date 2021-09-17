@@ -4,11 +4,19 @@
   "description": "Ordering backend for Scalapay test",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "author": "Mark Havryliv",
   "license": "ISC",
   "devDependencies": {
     "jest": "^27.2.0"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "node-fetch": "^3.0.0"
+  },
+  "type": "module",
+  "jest": {
+    "transform": {}
   }
 }
