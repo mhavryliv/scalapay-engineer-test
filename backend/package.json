@@ -1,0 +1,14 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Ordering backend for Scalapay test",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Mark Havryliv",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^27.2.0"
+  }
+}
