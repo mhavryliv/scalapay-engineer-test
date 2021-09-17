@@ -9,10 +9,12 @@ const port = 8123
 
 app.post('/order', (req, res) => {
   const order = req.body;
-  const validateResult = validateOrder(req.body);
-  console.log(validateResult);
-
-  res.send(validateResult);
+  try {
+    const validateResult = validateOrder(req.body);
+    res.send(validateResult);
+  }catch(error) {
+    res.send({'serverError': error});
+  }
 })
 
 app.listen(port, () => {

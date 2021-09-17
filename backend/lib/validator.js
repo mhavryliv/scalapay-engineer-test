@@ -77,7 +77,7 @@ const validateOrder = (order) => {
 
   // If there were no items, add this as an error
   if(!order.items || order.items.length === 0) {
-    itemErrors.push({field: 'items', msg: ErrMsgNoItems});
+    summaryErrors.push({field: 'items', msg: ErrMsgNoItems});
   }
 
   // Build the returned error object
@@ -175,4 +175,5 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
   return errors;
 }
 
-export {validateOrder, ErrMsgFieldInvalid, ErrMsgMissingField};
+export {validateOrder, 
+  ErrMsgFieldInvalid, ErrMsgMissingField, ErrMsgNoItems, ErrMsgNoOrder};

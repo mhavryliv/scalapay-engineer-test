@@ -14,9 +14,11 @@ test('Valid order', () => {
 });
 
 test('Invalid order: No items', () => {
-  const order = buildOrder(0);
+  const order = buildOrder();
+  delete order.items;
   const res = validator.validateOrder(order);
   expect(res.valid).toBe(false);
+  expect(res.errors.summary[0].msg).toBe(validator.ErrMsgNoItems);
 });
 
 test('Invalid order: 1 top-level field missing', () => {
