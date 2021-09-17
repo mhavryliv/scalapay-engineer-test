@@ -9,7 +9,7 @@ const ErrMsgMissingField = "Missing data";
 const ErrMsgFieldInvalid = "Invalid data";
 
 // An array of required objects and their fields, related to personal info
-const requiredPersonalObjects = [
+const requiredSummaryObjects = [
   {name: 'totalAmount', fields: 
     [{name: 'amount', isValid: (val) => {return val >= 0}}, 
      {name: 'currency', isValid: (code) => {return code.length === 3}}]
@@ -54,10 +54,63 @@ const isValid = (field, val) => {
   and problems.
 */
 const validate = (order) => {
-  // Keep record of errors
+  // Check the toplevel items in the order
+  const summaryErrors = checkSummaryInformation(order);
+
+  // Check the individual purchase items
+  // const itemErrors = checkPurchaseItemsInformation(order);
+
+  const errors = summaryErrors;
+
+  if(errors.length !== 0) {
+    return {
+      valid: false,
+      errors: errors
+    }  
+  }
+  else {
+    return {
+      valid: true
+    }
+  }
+}
+
+/*
+Check all the individual order items in @order.
+Returns an array of errors - if there are no errors, this will be an empty array.
+*/
+const checkPurchaseItemsInformation = (order) => {
   let errors = [];
+  const items = order.items;
+  if(!items || items.length === 0) {
+    return errors;
+  }
+
+  // Iterate through all the items in the order, and in an inner loop
+  // check each of their fields for validation against the required fields
+  items.forEach(item => {
+    requiredItemPurchaseInfo.forEach(requiredField => {
+      if(!item[requiredField.name]) {
+
+      }
+    });
+  });
+
+
+}
+
+/*
+Check all the summary order fields (not individual order items) in @order.
+Returns an array of errors - if there are no errors, this will be an empty array.
+*/
+const checkSummaryInformation = (order) => {
+  // Keep record of errors
+  let errors = objectFieldValidator(order, requiredSummaryObjects);
+
+  return errors;
+
   // Check for all required field objects
-  requiredPersonalObjects.forEach(fieldObj => {
+  requiredSummaryObjects.forEach(fieldObj => {
     // Check the order contains an object for this field object
     if(!order[fieldObj.name]) {
       errors.push({field: fieldObj.name, msg: ErrMsgMissingField})
@@ -87,24 +140,57 @@ const validate = (order) => {
       }
     });
   });
-
-  if(errors.length !== 0) {
-    return {
-      valid: false,
-      errors: errors
-    }  
-  }
-  else {
-    return {
-      valid: true
-    }
-  }
+  return errors;
 }
 
+/*
+  This is a generalised function to check the fields in @objToCheck against
+  those in @requiredFields, both for existence and validity.
+  Return an array of errors, empty array if none.
+*/
+const objectFieldValidator = (objectToValidate, requiredFields) => {
+  // Keep record of errors
+  let errors = [];
+  // Check for all required field objects
+  requiredFields.forEach(fieldObj => {
+    // Check the object contains a value for this field object
+    if(!objectToValidate[fieldObj.name]) {
+      errors.push({field: fieldObj.name, msg: ErrMsgMissingField})
+      return;
+    }
+    // Get a convenience reference to the object to validate
+    const objectRef = objectToValidate[fieldObj.name];
+    // If this field object has no child fields, simply check it's validity and 
+    // continue the loop
+    if(!fieldObj.fields) {
+      if(!isValid(fieldObj, objectRef)) {
+        errors.push({field: fieldObj.name, msg: ErrMsgFieldInvalid})
+        return;
+      }
+    }
+    // Else, loop through the field's child fields and check their existence and validity
+    fieldObj.fields.forEach(childField => {
+      const objectRefChildVal = objectRef[childField.name];
+      // If the order doesn't contain the required child field, add and error and continue
+      if(!objectRefChildVal) {
+        errors.push({field: fieldObj.name + "." + childField.name, msg: ErrMsgMissingField})
+        return;
+      }
+      // Check the chield field's validity
+      if(!isValid(childField, objectRefChildVal)) {
+        errors.push({field: fieldObj.name + "." + childField.name, msg: ErrMsgFieldInvalid})
+        return;
+      }
+    });
+  });
+  return errors;
+}
 
 
 exports.validate = validate;
 
 // Export these to help build test cases
-exports.requiredPersonalObjects = requiredPersonalObjects;
+exports.ErrMsgFieldInvalid = ErrMsgFieldInvalid;
+exports.ErrMsgMissingField = ErrMsgMissingField;
+exports.requiredSummaryObjects = requiredSummaryObjects;
 exports.requiredItemPurchaseInfo = requiredItemPurchaseInfo;
