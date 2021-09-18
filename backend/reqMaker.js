@@ -1,8 +1,9 @@
 import fetch from 'node-fetch'
+import fs from 'fs'
 
 const makeScalapayReqAndHandleRes = async (order) => {
   const res = await makeScalapayReq(order);
-  if(res.messages && res.messages.errors) {
+  if(res.message && res.message.errors) {
     handleScalapayAndThisValidityDisagreement(order, res);
   }
   return res;
@@ -11,34 +12,18 @@ const makeScalapayReqAndHandleRes = async (order) => {
 /*
   Handles when this server has decided an order is valid and sent it to
   Scalapay, but Scalapay responds saying it's invalid.
-  We should track these occurances to figure out what is wrong in our validation
+  We track these occurances in ValidationErrors.json 
+  to figure out what is wrong in our validation.
 */
 const handleScalapayAndThisValidityDisagreement = (order, sclpayRes) => {
-  console.log("Scalapay says this order is wrong!");
-  console.log(sclpayRes);
-
-  /* The Scalapay v2/orders error schema is:
-  message: {
-    errors: [
-      {
-        field: [
-          "totalAmount",
-          "currency"
-        ]
-      },
-      {
-        field: [
-          "items",
-          0
-          "name"
-        ]
-      }
-    ]
+  const errFileJson = JSON.parse(fs.readFileSync('./ValidationErrors.json'));
+  const errObj = {
+    date: new Date(),
+    order: order,
+    scalaResponse: sclpayRes
   }
-
-  Where the dot properties are represented by array items
-  */
-
+  errFileJson.push(errObj);
+  fs.writeFileSync('./ValidationErrors.json', JSON.stringify(errFileJson));
 }
 
 const makeScalapayReq = async (order) => {
