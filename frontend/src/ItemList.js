@@ -7,11 +7,19 @@ function ItemList (props) {
     props.update(i, field, value);
   }
 
+  const removeItem = (i) => {
+    props.removeItem(i);
+  }
+
+  if(props.items.length === 0) {
+    return false
+  }
   return <div>
-    <h3>Items</h3>
+    <h4>Items</h4>
     {props.items.map((item, i) => {
-      return <Item vals={item} key={i} 
-        update={(name, value) => {itemUpdated(i, name, value)}}/>
+      return <Item item={item} key={i} 
+        update={(name, value) => {itemUpdated(i, name, value)}}
+        removeItem={() => removeItem(i)} />
     })}
   </div>
 }

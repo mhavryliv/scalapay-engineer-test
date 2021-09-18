@@ -2,8 +2,8 @@ import React from "react";
 
 function Total(props) {
   return <div className="totalDiv">
-    <div>Total Amount: {props.totalAmount}</div>
-    <div>Currency: {props.currency}</div>
+    <div>{props.order.totalAmount.amount}</div>
+    <div>&nbsp;{props.order.totalAmount.currency}</div>
   </div>
 
 }
