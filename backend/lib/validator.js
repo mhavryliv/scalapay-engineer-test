@@ -6,10 +6,10 @@
 const MaxStrLen = 50;
 
 // Error messages
-const ErrMsgNoOrder = "Missing order";
-const ErrMsgNoItems = "No items";
-const ErrMsgMissingField = "Missing data";
-const ErrMsgFieldInvalid = "Invalid data";
+const ErrMsgNoOrder = "MissingOrder";
+const ErrMsgNoItems = "NoItems";
+const ErrMsgMissingField = "MissingData";
+const ErrMsgFieldInvalid = "InvalidData";
 
 // An array of required objects and their fields, related to personal info
 const requiredSummaryObjects = [
@@ -67,25 +67,25 @@ const validateOrder = (order) => {
   if(!order) {
     return {
       valid: false,
-      errors: [{field: 'order', msg: ErrMsgNoOrder}]
+      errors: [{field: 'order', code: ErrMsgNoOrder, msg: "No order"}]
     }
   }
   // Check the toplevel items in the order
-  const summaryErrors = checkSummaryInformation(order);
+  const userAndShippingErrors = checkUserAndShippingInformation(order);
 
   const itemErrors = checkPurchaseItemsInformation(order);
 
   // If there were no items, add this as an error
   if(!order.items || order.items.length === 0) {
-    summaryErrors.push({field: 'items', msg: ErrMsgNoItems});
+    userAndShippingErrors.push({field: 'items', code: ErrMsgNoItems, msg: "Order contains no items"});
   }
 
   // Build the returned error object
   let errors = {
-    summary: summaryErrors,
+    userAndShipping: userAndShippingErrors,
     items: itemErrors
   }
-  if(errors.summary.length !== 0 || errors.items.length !== 0) {
+  if(errors.userAndShipping.length !== 0 || errors.items.length !== 0) {
     return {
       valid: false,
       errors: errors
@@ -126,7 +126,7 @@ const checkPurchaseItemsInformation = (order) => {
 Check all the summary order fields (not individual order items) in @order.
 Returns an array of errors - if there are no errors, this will be an empty array.
 */
-const checkSummaryInformation = (order) => {
+const checkUserAndShippingInformation = (order) => {
   // Keep record of errors
   let errors = objectFieldValidator(order, requiredSummaryObjects);
   return errors;
@@ -144,7 +144,7 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
   requiredFields.forEach(fieldObj => {
     // Check the object contains a value for this field object
     if(!objectToValidate[fieldObj.name]) {
-      errors.push({field: fieldObj.name, msg: ErrMsgMissingField})
+      errors.push({field: fieldObj.name, code: ErrMsgMissingField, msg: "Required"})
       return;
     }
     // Get a convenience reference to the object to validate
@@ -153,7 +153,7 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
     // continue the loop
     if(!fieldObj.fields) {
       if(!isValid(fieldObj, objectRef)) {
-        errors.push({field: fieldObj.name, msg: ErrMsgFieldInvalid})
+        errors.push({field: fieldObj.name, code: ErrMsgFieldInvalid, msg: "Invalid"})
       }
       return;
     }
@@ -162,12 +162,14 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
       const objectRefChildVal = objectRef[childField.name];
       // If the order doesn't contain the required child field, add and error and continue
       if(!objectRefChildVal) {
-        errors.push({field: fieldObj.name + "." + childField.name, msg: ErrMsgMissingField})
+        errors.push({field: fieldObj.name + "." + childField.name,
+         code: ErrMsgMissingField, msg: "Required"})
         return;
       }
       // Check the chield field's validity
       if(!isValid(childField, objectRefChildVal)) {
-        errors.push({field: fieldObj.name + "." + childField.name, msg: ErrMsgFieldInvalid})
+        errors.push({field: fieldObj.name + "." + childField.name, 
+        code: ErrMsgFieldInvalid, msg: "Invalid"})
         return;
       }
     });

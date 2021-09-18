@@ -23,6 +23,9 @@ function App() {
       countryCode: ''
     }
   });
+  const [errors, setErrors] = useState({
+
+  })
   // Add new item, populate with filler content
   const addItem = () => {
     const newItems = [...items];
