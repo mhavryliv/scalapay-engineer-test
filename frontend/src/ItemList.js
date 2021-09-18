@@ -19,7 +19,8 @@ function ItemList (props) {
     {props.items.map((item, i) => {
       return <Item item={item} key={i} 
         update={(name, value) => {itemUpdated(i, name, value)}}
-        removeItem={() => removeItem(i)} />
+        removeItem={() => removeItem(i)} 
+        errors={props.itemErrors[i]}/>
     })}
   </div>
 }

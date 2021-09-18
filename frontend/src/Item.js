@@ -7,37 +7,63 @@ function Item(props) {
   const handleChange = (event) => {
     props.update(event.target.name, event.target.value);
   };
+  const hasErr = (name) => {
+    if(props.errors) {
+      if(props.errors[name]) {
+        return true;
+      }
+    }
+    return false;
+  }
+  const helperStr = (maxChar = MaxStrLen) => {
+    return "Required (" + maxChar + " char max)";
+  }
+  const helperStrPositiveNum = () => {
+    return "Must be greater than 0"
+  }
 
   const itemLayout = (props) => {
     return <div className="item">
       <TextField label="Product Name" variant="standard"  name="productName"
         onChange={handleChange} value={props.item.name}
-        inputProps={{maxLength:MaxStrLen}} required/>
+        inputProps={{maxLength:MaxStrLen}} required
+        error={hasErr('name')} 
+        helperText={hasErr('name') ? helperStr() : ''}/>
 
       <TextField label="Category" variant="standard" name="category"
         onChange={handleChange} value={props.item.category}
-        inputProps={{maxLength:MaxStrLen}} required/>
+        inputProps={{maxLength:MaxStrLen}} required
+        error={hasErr('category')} 
+        helperText={hasErr('category') ? helperStr() : ''}/>
 
       <TextField label="SKU" variant="standard" name="sku"
         onChange={handleChange} value={props.item.sku}
-        inputProps={{maxLength:MaxStrLen}} required/>
+        inputProps={{maxLength:MaxStrLen}} required
+        error={hasErr('sku')} 
+        helperText={hasErr('sku') ? helperStr() : ''}/>
 
       <div className="itemPrice">
         <TextField label="Price" variant="standard" name="price.amount"
           onChange={handleChange} value={props.item.price.amount} type="number"
-          style={{flexGrow:1}} required inputProps={{min:"0"}}/>
+          style={{flexGrow:1}} required inputProps={{min:"0"}}
+          error={hasErr('price.amount')} 
+          helperText={hasErr('price.amount') ? helperStrPositiveNum() : ''}/>
 
         <TextField label="Currency" variant="standard" name="price.currency"
           onChange={handleChange} value={props.item.price.currency}
-          inputProps={{maxLength:3}} required/>
+          inputProps={{maxLength:3}} required
+          error={hasErr('price.currency')} 
+          helperText={hasErr('price.currency') ? helperStr() : ''}/>
 
         <TextField label="Quantity" type="number" variant="standard" name="quantity"
           InputLabelProps={{
             shrink: true,
           }}
           inputProps={{min:"0"}}
-          onChange={handleChange} value={props.item.quantity} required/>
-          
+          onChange={handleChange} value={props.item.quantity} required
+          error={hasErr('quantity')} 
+          helperText={hasErr('quantity') ? helperStrPositiveNum() : ''}/>
+
         <Button onClick={props.removeItem}>Remove</Button>
       </div>      
     </div>

@@ -27,6 +27,7 @@ function App() {
     }
   });
   const [errors, setErrors] = useState({})
+  const [itemErrors, setItemErrors] = useState([])
   const [generalError, setGeneralError] = useState('');
 
   // Catch any change to items, and update the order
@@ -42,10 +43,20 @@ function App() {
     userAndShippingErrors.forEach(err => {
       errObj[err.field] = true;
     });
-    const itemErrors = errors.itemErrors;
-
-    console.log(errObj);
+    // Create the array of empty item errors (size of the number of current items),
+    // then fill in error fields as with order above
+    const newItemErrors = [];
+    for(let i = 0; i < items.length; ++i) {
+      newItemErrors.push({})
+    }
+    errors.items.forEach(item => {
+      const itemIndex = item.itemIndex;
+      item.errors.forEach(err => {
+        newItemErrors[itemIndex][err.field] = true;
+      });
+    });
     setErrors(errObj);
+    setItemErrors(newItemErrors);
   }
   // Add new item, populate with filler content
   const addItem = () => {
@@ -67,19 +78,21 @@ function App() {
     // Clear all errors
     setGeneralError('');
     setErrors({});
+    setItemErrors([]);
     const reqOrder = {...order};
     reqOrder.items = items;
+    let res;
     try {
       console.log("About to send post req to backend");
-      const res = await axios.post('http://localhost:8123/order', reqOrder);
-      const data = res.data;
-      console.log(data);
-      handleOrderPlacement(data);
+      res = await axios.post('http://localhost:8123/order', reqOrder);
     }
     catch(reqErr) {
       console.log("Request error: " + reqErr);
       setGeneralError("Server error when placing order: " + reqErr);
+      return;
     }
+    const data = res.data;
+    handleOrderPlacement(data);
   }
 
   const handleOrderPlacement = (res) => {
@@ -152,24 +165,23 @@ function App() {
       </header>
       <div className="formContainer">
         <UserAndShippingInfo name="Mark" order={order} 
-        update={updateFromUserAndShipping} errors={errors}/>
-        <ItemList items={items} update={updateFromItems} removeItem={removeItem}/>
+          update={updateFromUserAndShipping} errors={errors}/>
+        <ItemList items={items} update={updateFromItems} removeItem={removeItem}
+          itemErrors={itemErrors} />
         <Button onClick={addItem}>Add Item</Button>
         {errors.items && items.length === 0 &&
           <div className="error">One or more items required to place order</div>
         }
+
         <div className="summaryDiv">
           <h4>Summary</h4>
           <Total order={order}/>
           <Button onClick={placeOrder}>Place order</Button>
-
           {generalError.length !== 0 &&
             <div className="error">{generalError}</div>
           }
         </div>
       </div>
-
-
     </div>
   );
 }

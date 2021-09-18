@@ -27,7 +27,7 @@ const requiredSummaryObjects = [
 
 // An array of required info for an item
 const requiredItemPurchaseInfo = [
-  {name: 'quantity', isValid: (val) => {return Number.isInteger(val) && val >= 0}},
+  {name: 'quantity', isValid: (val) => {return val >= 0}},
   {name: 'price', fields:
    [{name: 'amount', isValid: (val) => {return val >= 0}}, {name: 'currency'}]
   },
