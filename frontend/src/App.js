@@ -96,8 +96,12 @@ function App() {
   }
 
   const handleOrderPlacement = (res) => {
+    console.log(res);
     if(res.valid) {
       // look for the redirect URL
+      if(res.checkoutUrl) {
+        window.location.href = res.checkoutUrl;
+      }
     }
     else {
       // notify user with errors
@@ -126,6 +130,7 @@ function App() {
     const updatedItems = [...items];
     updatedItems.splice(index, 1);
     setItems(updatedItems);
+    setItemErrors([])
   }
 
   const updateFromUserAndShipping = (field, value) => {

@@ -3,6 +3,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import { validateOrder } from './lib/validator.js'
+import {makeScalapayReqAndHandleRes} from './reqMaker.js'
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
@@ -14,15 +15,15 @@ app.post('/order', (req, res) => {
   handleRequest(req.body, res);
 })
 
-const handleRequest = (body, res) => {
-  const order = req.body;
+const handleRequest = async (order, res) => {
   // Check validity, and handle a server error
   const validityResult = checkValidity(order);
   if(validityResult.serverError) {
+    console.log(validityResult)
     return res.status(400).send(validityResult);
   }
   // If the request is not valid, return that
-  if(validateResult.valid === false) {
+  if(validityResult.valid === false) {
     return res.send(validityResult);
   }
   // If it was valid, then send the order to the Scalapay server
@@ -31,7 +32,8 @@ const handleRequest = (body, res) => {
     if(result.checkoutUrl) {
       // this was a succesful order
       const goodResult = {
-        redirectUrl: result.checkoutUrl
+        valid: true,
+        checkoutUrl: result.checkoutUrl
       }
       return res.send(goodResult);
     }
@@ -50,7 +52,7 @@ const handleRequest = (body, res) => {
 
 const checkValidity = (order) => {
   try {
-    const validateResult = validateOrder(req.body);
+    const validateResult = validateOrder(order);
     return validateResult;
   }
   catch(error) {

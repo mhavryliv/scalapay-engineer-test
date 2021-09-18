@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import { TextField } from '@mui/material';
 import './App.css'
 import { MaxStrLen } from './inputConstraints.js'
@@ -11,7 +11,6 @@ function UserAndShippingInfo(props)  {
   const hasErr = (name) => {
     return props.errors[name];
   }
-
   const helperStr = (maxChar = MaxStrLen) => {
     return "Required (" + maxChar + " char max)";
   }
