@@ -14,7 +14,7 @@ const ErrMsgFieldInvalid = "InvalidData";
 // An array of required objects and their fields, related to personal info
 const requiredSummaryObjects = [
   {name: 'totalAmount', fields: 
-    [{name: 'amount', isValid: (val) => {return val >= 0}}, 
+    [{name: 'amount', isValid: (val) => {return val >= 0}, parse: (val) => {return val.toString()}},
      {name: 'currency', isValid: (code) => {return code.length === 3}}]
   },
   {name: 'consumer', fields: [{name: 'givenNames'}, {name: 'surname'}]},
@@ -27,9 +27,12 @@ const requiredSummaryObjects = [
 
 // An array of required info for an item
 const requiredItemPurchaseInfo = [
-  {name: 'quantity', isValid: (val) => {return val >= 0}},
+  {name: 'quantity', isValid: (val) => {return val >= 0}, 
+    parse: (val) => {return val.toString()}},
   {name: 'price', fields:
-   [{name: 'amount', isValid: (val) => {return val >= 0}}, {name: 'currency'}]
+   [{name: 'amount', isValid: (val) => {return val >= 0}, 
+    parse: (val) => {return val.toString()}},
+  {name: 'currency'}]
   },
   {name: 'name'},
   {name: 'category'},
@@ -156,6 +159,12 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
       if(!isValid(fieldObj, objectRef)) {
         errors.push({field: fieldObj.name, code: ErrMsgFieldInvalid, msg: "Invalid"})
       }
+      // Make sure it's parsed properly
+      else {
+        if(fieldObj.parse) {
+          objectToValidate[fieldObj.name] = fieldObj.parse(objectToValidate[fieldObj.name]);
+        }
+      }
       return;
     }
     // Else, loop through the field's child fields and check their existence and validity
@@ -172,6 +181,12 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
         errors.push({field: fieldObj.name + "." + childField.name, 
         code: ErrMsgFieldInvalid, msg: "Invalid"})
         return;
+      }
+      // Make sure it's parsed properly
+      else {
+        if(childField.parse) {
+          objectRef[childField.name] = childField.parse(objectRefChildVal);
+        }
       }
     });
   });
