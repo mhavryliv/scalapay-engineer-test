@@ -1,9 +1,11 @@
 import fetch from 'node-fetch'
 import express from 'express'
 import bodyParser from 'body-parser'
+import cors from 'cors'
 import { validateOrder } from './lib/validator.js'
-const app = express()
-app.use(bodyParser.json())
+const app = express();
+app.use(bodyParser.json());
+app.use(cors());
 
 const port = 8123
 
@@ -13,7 +15,7 @@ app.post('/order', (req, res) => {
     const validateResult = validateOrder(req.body);
     res.send(validateResult);
   }catch(error) {
-    res.send({'serverError': error});
+    res.status(400).send({'serverError': error});
   }
 })
 

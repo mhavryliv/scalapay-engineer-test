@@ -22,6 +22,10 @@
   max-width: 500px;
 }
 
+.error {
+  color: red;
+}
+
 .item {
   display: flex;
   flex-direction: column;

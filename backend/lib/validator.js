@@ -20,7 +20,8 @@ const requiredSummaryObjects = [
   {name: 'consumer', fields: [{name: 'givenNames'}, {name: 'surname'}]},
   {name: 'shipping', fields: 
     [{name: 'countryCode', isValid: (code) => {return code.length === 2}},
-    {name: 'name'}, {name: 'postcode'}, {name: 'line1'}]
+    {name: 'name'}, {name: 'postcode', isValid: (pc) => {return pc.length <= 10}},
+    {name: 'line1'}]
   }
 ]
 
