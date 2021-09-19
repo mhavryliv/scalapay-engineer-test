@@ -1,5 +1,5 @@
 import {buildOrder} from './orderBuilder.js'
-import {makeScalapayReqAndHandleRes} from './../reqMaker.js'
+import {makeScalapayReqAndHandleRes} from './../lib/reqMaker.js'
 import * as validator from './../lib/validator.js'
 
 test('Valid data is valid with Scalapay', async () => {

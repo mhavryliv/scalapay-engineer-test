@@ -3,7 +3,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import { validateOrder } from './lib/validator.js'
-import {makeScalapayReqAndHandleRes} from './reqMaker.js'
+import {makeScalapayReqAndHandleRes} from './lib/reqMaker.js'
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
