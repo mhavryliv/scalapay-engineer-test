@@ -4,7 +4,8 @@
   "description": "Ordering backend for Scalapay test",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "server": "node server.js"
   },
   "author": "Mark Havryliv",
   "license": "ISC",
