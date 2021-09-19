@@ -6,6 +6,8 @@ This web app uses React (with Material UI) for the frontend, and Node.js for the
 
 Run 'npm install' in ./backend to setup the backend project.
 
+Run 'npm install' in ./frontend to setup the frontend React project.
+
 ## Running
 
 Start the backend by running 'npm run server' in ./backend. This will launch a server on localhost:8123, expecting POST request at the /order endpoint.
