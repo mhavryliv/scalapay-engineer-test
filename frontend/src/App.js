@@ -41,7 +41,7 @@ function App() {
     const errObj = {}
     const userAndShippingErrors = errors.userAndShipping;
     userAndShippingErrors.forEach(err => {
-      errObj[err.field] = true;
+      errObj[err.field] = [true, err.messages[0]];
     });
     // Create the array of empty item errors (size of the number of current items),
     // then fill in error fields as with order above
@@ -67,7 +67,7 @@ function App() {
       sku: "12345678",
       price: {
         amount: 79,
-        currency: "EUR",
+        currency: order.totalAmount.currency,
       },
       quantity: 1
     })
@@ -144,6 +144,15 @@ function App() {
       updatedOrder[field] = value;
     }
     setOrder(updatedOrder);
+
+    // If the totalAmount.currency field was updated, update all the items too
+    if(field === "totalAmount.currency") {
+      const updatedItems = [...items];
+      updatedItems.forEach(item => {
+        item.price.currency = value
+      })
+      setItems(updatedItems);
+    }    
   }
 
   /*
@@ -151,16 +160,10 @@ function App() {
   */
   const calculateAndAssignTotalAmount = (order) => {
     let totalPrice = 0;
-    // Use the first currency code as default, and if none, then 
-    let orderCurrency = order.totalAmount.currency;
-    if(items.length > 0) {
-      orderCurrency = items[0].price.currency;
-    }
     for(let i = 0; i < items.length; ++i) {
       totalPrice += parseFloat(items[i].price.amount * items[i].quantity);
     }
     order.totalAmount.amount = totalPrice.toFixed(2);
-    order.totalAmount.currency = orderCurrency;
   }
 
   return (
@@ -180,7 +183,7 @@ function App() {
 
         <div className="summaryDiv">
           <h4>Summary</h4>
-          <Total order={order}/>
+          <Total order={order} update={updateFromUserAndShipping} errors={errors}/>
           <Button onClick={placeOrder}>Place order</Button>
           {generalError.length !== 0 &&
             <div className="error">{generalError}</div>

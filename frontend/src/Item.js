@@ -45,26 +45,31 @@ function Item(props) {
       <div className="itemPrice">
         <TextField label="Price" variant="standard" name="price.amount"
           onChange={handleChange} value={props.item.price.amount} type="number"
-          style={{flexGrow:1}} required inputProps={{min:"0"}}
+          required inputProps={{min:"0"}}
+          style={{width: '100px'}}
           error={hasErr('price.amount')} 
           helperText={hasErr('price.amount') ? helperStrPositiveNum() : ''}/>
 
         <TextField label="Currency" variant="standard" name="price.currency"
           onChange={handleChange} value={props.item.price.currency}
-          inputProps={{maxLength:3}} required
-          error={hasErr('price.currency')} 
-          helperText={hasErr('price.currency') ? helperStr() : ''}/>
+          inputProps={{maxLength:3}} InputProps={{readOnly: true}} disabled
+          style={{width: '100px'}}
+          // error={hasErr('price.currency')} 
+          // helperText={hasErr('price.currency') ? helperStr() : ''}
+          />
 
         <TextField label="Quantity" type="number" variant="standard" name="quantity"
           InputLabelProps={{
             shrink: true,
           }}
           inputProps={{min:"0"}}
+          style={{width: '100px'}}
           onChange={handleChange} value={props.item.quantity} required
           error={hasErr('quantity')} 
           helperText={hasErr('quantity') ? helperStrPositiveNum() : ''}/>
 
-        <Button onClick={props.removeItem}>Remove</Button>
+        <Button onClick={props.removeItem} style={{"marginLeft": "auto"}}
+        >Remove</Button>
       </div>      
     </div>
 

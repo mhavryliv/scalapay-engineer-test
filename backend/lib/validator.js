@@ -15,7 +15,8 @@ const ErrMsgFieldInvalid = "InvalidData";
 const requiredSummaryObjects = [
   {name: 'totalAmount', fields: 
     [{name: 'amount', isValid: (val) => {return val >= 0}, parse: (val) => {return val.toString()}},
-     {name: 'currency', isValid: (code) => {return code.length === 3}}]
+     {name: 'currency', isValid: (code) => {return code.toLowerCase() === 'eur'},
+      validMessage: "Must be either EUR or eur"}]
   },
   {name: 'consumer', fields: [{name: 'givenNames'}, {name: 'surname'}]},
   {name: 'shipping', fields: 
@@ -167,7 +168,11 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
     // continue the loop
     if(!fieldObj.fields) {
       if(!isValid(fieldObj, objectRef)) {
-        errors.push({field: fieldObj.name, code: ErrMsgFieldInvalid, messages: ["Invalid"]})
+        let messages = ["Invalid"];
+        if(fieldObj.validMessage) {
+          messages = [fieldObj.validMessage];
+        }
+        errors.push({field: fieldObj.name, code: ErrMsgFieldInvalid, messages: messages})
       }
       // Make sure it's parsed properly
       else {
@@ -188,8 +193,12 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
       }
       // Check the chield field's validity
       if(!isValid(childField, objectRefChildVal)) {
+        let messages = ["Invalid"];
+        if(childField.validMessage) {
+          messages = [childField.validMessage];
+        }
         errors.push({field: fieldObj.name + "." + childField.name, 
-        code: ErrMsgFieldInvalid, messages: ["Invalid"]})
+        code: ErrMsgFieldInvalid, messages: messages})
         return;
       }
       // Make sure it's parsed properly
