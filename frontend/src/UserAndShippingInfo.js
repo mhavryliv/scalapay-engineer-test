@@ -9,7 +9,7 @@ function UserAndShippingInfo(props)  {
   };
 
   const hasErr = (name) => {
-    return props.errors[name];
+    return props.errors[name] ? true : false;
   }
   const helperStr = (maxChar = MaxStrLen) => {
     return "Required (" + maxChar + " char max)";
@@ -57,7 +57,7 @@ function UserAndShippingInfo(props)  {
             onChange={handleChange} value={props.order.shipping.countryCode}
             inputProps={{maxLength:2}} required
             error={hasErr('shipping.countryCode')} 
-            helperText={hasErr('shipping.countryCode') ? helperStr(2) : ''}/>
+            helperText={hasErr('shipping.countryCode') ? "Required (2 char)" : ''}/>
 
         </div>
       </div>

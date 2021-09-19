@@ -50,14 +50,15 @@ const isValid = (field, val) => {
     const res = field.isValid(val);
     return res;
   }
-  // otherwise, test for string length and sanitisation
+  // Otherwise, test for string length and sanitisation
   else {
     if(val.length > MaxStrLen) {
       return false;
     }
-    // We should also sanitise the string here, but I don't know 
-    // what is the best library for this (and am assuming that Scalapay endpoint
-    // is also sanitising...) I would ask a colleague for advice on this.
+    /*We should also sanitise the string here, but I don't know 
+      what is the best library for this (and am assuming that Scalapay endpoint
+      is also sanitising...) I would ask a colleague for advice on this.
+    */
     return true;
   }
 }
@@ -105,8 +106,8 @@ const validateOrder = (order) => {
 }
 
 /*
-Check all the individual order items in @order.
-Returns an array of errors - if there are no errors, this will be an empty array.
+  Check all the individual order items in @order.
+  Returns an array of errors - if there are no errors, this will be an empty array.
 */
 const checkPurchaseItemsInformation = (order) => {
   let errors = [];
@@ -118,8 +119,9 @@ const checkPurchaseItemsInformation = (order) => {
   // Store the order currency to compare against the item price.currency fields
   const orderCurrency = order.totalAmount ? order.totalAmount.currency.toLowerCase() : '';
 
-  // Iterate through all the items in the order, and in an inner loop
-  // check each of their fields for validation against the required fields
+  /* Iterate through all the items in the order, and in an inner loop
+    check each of their fields for validation against the required fields
+  */
   for(let i = 0; i < items.length; ++i) {
     // Do the general object field validator
     let itemErrors = objectFieldValidator(items[i], requiredItemPurchaseInfo);
@@ -164,8 +166,7 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
     }
     // Get a convenience reference to the object to validate
     const objectRef = objectToValidate[fieldObj.name];
-    // If this field object has no child fields, simply check it's validity and 
-    // continue the loop
+    // If this field object has no child fields, check its validity and continue looping
     if(!fieldObj.fields) {
       if(!isValid(fieldObj, objectRef)) {
         let messages = ["Invalid"];

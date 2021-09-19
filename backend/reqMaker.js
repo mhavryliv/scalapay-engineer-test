@@ -1,8 +1,15 @@
 import fetch from 'node-fetch'
 import fs from 'fs'
 
+/*
+  Coordinates making the request to the Scalapay server, and handling any errors
+*/
 const makeScalapayReqAndHandleRes = async (order) => {
   const res = await makeScalapayReq(order);
+  /* If Scalapay reports an error with the order, we make note of it for
+    future debugging (i.e. our validation should have caught any errors before
+    sending to Scalapay)
+   */
   if(res.message && res.message.errors) {
     handleScalapayAndThisValidityDisagreement(order, res);
     let errors = convertScalapayErrorIntoLocalScheme(res.message.errors);
@@ -67,6 +74,9 @@ const handleScalapayAndThisValidityDisagreement = (order, scalaPayRes) => {
   fs.writeFileSync('./ValidationErrors.json', JSON.stringify(errFileJson));
 }
 
+/*
+  Make the request to Scalapay
+*/
 const makeScalapayReq = async (order) => {
   // Add the merchant fields to the order
   order.merchant = {

@@ -21,15 +21,15 @@ const handleRequest = async (order, res) => {
   if(validityResult.serverError) {
     return res.status(400).send(validityResult);
   }
-  // If the request is not valid, return that
+  // If the request is not valid, return the error result
   if(validityResult.valid === false) {
     return res.send(validityResult);
   }
-  // If it was valid, then send the order to the Scalapay server
+  // If it was valid, send the order to the Scalapay server
   try {
     let result = await makeScalapayReqAndHandleRes(order);
+    // If checkoutUrl is a field, the order was succesful
     if(result.checkoutUrl) {
-      // this was a succesful order
       const goodResult = {
         valid: true,
         checkoutUrl: result.checkoutUrl
@@ -38,11 +38,11 @@ const handleRequest = async (order, res) => {
     }
     else {
       // Something went wrong, and we should tell the user what Scalapay told us
-      const retObj = {
+      const badResult = {
         scalapayError: true,
         errors: result.errors
       }
-      return res.send(retObj);
+      return res.send(badResult);
     }
   }catch(error) {
     return res.status(400).send({'serverError': error});

@@ -6,6 +6,8 @@ import ItemList from './ItemList.js'
 // import Item from './Item.js'
 import Total from './Total';
 import { Button } from '@mui/material';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 function App() {
@@ -29,6 +31,8 @@ function App() {
   const [errors, setErrors] = useState({})
   const [itemErrors, setItemErrors] = useState([])
   const [generalError, setGeneralError] = useState('');
+  const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
+  const [waitingMessage, setWaitingMessage] = useState('');
 
   // Catch any change to items, and update the order
   useEffect(() => {
@@ -41,7 +45,7 @@ function App() {
     const errObj = {}
     const userAndShippingErrors = errors.userAndShipping;
     userAndShippingErrors.forEach(err => {
-      errObj[err.field] = [true, err.messages[0]];
+      errObj[err.field] = [true, err.messages];
     });
     // Create the array of empty item errors (size of the number of current items),
     // then fill in error fields as with order above
@@ -52,7 +56,7 @@ function App() {
     errors.items.forEach(item => {
       const itemIndex = item.itemIndex;
       item.errors.forEach(err => {
-        newItemErrors[itemIndex][err.field] = true;
+        newItemErrors[itemIndex][err.field] = [true, err.messages];
       });
     });
     setErrors(errObj);
@@ -82,31 +86,36 @@ function App() {
     const reqOrder = {...order};
     reqOrder.items = items;
     let res;
+    setWaitingMessage('Placing order...');
+    setIsWaitingForResponse(true);
     try {
       console.log("About to send post req to backend");
       res = await axios.post('http://localhost:8123/order', reqOrder);
+      const data = res.data;
+      handleOrderPlacement(data);  
     }
     catch(reqErr) {
       console.log("Request error: " + reqErr);
       setGeneralError("Server error when placing order: " + reqErr);
+      setIsWaitingForResponse(false);
       return;
-    }
-    const data = res.data;
-    handleOrderPlacement(data);
+    } 
   }
 
   const handleOrderPlacement = (res) => {
-    console.log(res);
     if(res.valid) {
       // look for the redirect URL
       if(res.checkoutUrl) {
+        setWaitingMessage("Directing you to payment site...");
         window.location.href = res.checkoutUrl;
+        return;
       }
     }
     else {
       // notify user with errors
       parseReturnedErrors(res.errors);
     }
+    setIsWaitingForResponse(false);
   }
 
   const updateFromItems = (index, field, value) => {
@@ -171,6 +180,18 @@ function App() {
       <header className="App-header">
         Scalapay Engineering Assessment
       </header>
+
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isWaitingForResponse}
+      >
+        <div style={{'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center'}}>
+        <h4>{waitingMessage}</h4>
+        
+        <CircularProgress color="inherit" />
+        </div>
+      </Backdrop>
+
       <div className="formContainer">
         <UserAndShippingInfo name="Mark" order={order} 
           update={updateFromUserAndShipping} errors={errors}/>

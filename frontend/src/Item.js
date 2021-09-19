@@ -51,11 +51,9 @@ function Item(props) {
           helperText={hasErr('price.amount') ? helperStrPositiveNum() : ''}/>
 
         <TextField label="Currency" variant="standard" name="price.currency"
-          onChange={handleChange} value={props.item.price.currency}
+          value={props.item.price.currency}
           inputProps={{maxLength:3}} InputProps={{readOnly: true}} disabled
           style={{width: '100px'}}
-          // error={hasErr('price.currency')} 
-          // helperText={hasErr('price.currency') ? helperStr() : ''}
           />
 
         <TextField label="Quantity" type="number" variant="standard" name="quantity"

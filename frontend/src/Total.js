@@ -1,6 +1,5 @@
 import React from "react";
 import { TextField } from "@mui/material";
-import { MaxStrLen } from './inputConstraints.js'
 
 function Total(props) {
   const hasErr = (name) => {
@@ -15,7 +14,7 @@ function Total(props) {
   const errString = (name) => {
     if(props.errors) {
       if(props.errors[name]) {
-        return props.errors[name][1]
+        return props.errors[name][1][0]
       }
     }
     return ''
@@ -24,10 +23,6 @@ function Total(props) {
   const handleChange = (event) => {
     props.update(event.target.name, event.target.value);
   };
-
-  const helperStr = (maxChar = MaxStrLen) => {
-    return "Required (" + maxChar + " char max)";
-  }
 
   return <div className="totalDiv">
     <div>{props.order.totalAmount.amount}</div>
