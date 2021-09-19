@@ -19,7 +19,6 @@ const handleRequest = async (order, res) => {
   // Check validity, and handle a server error
   const validityResult = checkValidity(order);
   if(validityResult.serverError) {
-    console.log(validityResult)
     return res.status(400).send(validityResult);
   }
   // If the request is not valid, return that
@@ -41,7 +40,7 @@ const handleRequest = async (order, res) => {
       // Something went wrong, and we should tell the user what Scalapay told us
       const retObj = {
         scalapayError: true,
-        errors: result.message.errors
+        errors: result.errors
       }
       return res.send(retObj);
     }

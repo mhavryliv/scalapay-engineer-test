@@ -2,6 +2,7 @@ import {buildOrder} from './orderBuilder.js'
 import {makeScalapayReqAndHandleRes} from './../reqMaker.js'
 import * as validator from './../lib/validator.js'
 
+/*
 test('Valid data is valid with Scalapay', async () => {
   const order = buildOrder(1, 1);
   validator.validateOrder(order);
@@ -30,5 +31,25 @@ test('Invalid data is invalid with Scalapay', async () => {
   catch(error) {
     thrownErr = error;
   }
-  expect(res.message.errors).not.toBeUndefined();
+  expect(res.errors.userAndShipping).not.toBeUndefined();
+  expect(res.errors.userAndShipping[0].field).toBe("totalAmount");
 });
+
+test('Invalid item data is invalid with Scalapay', async () => {
+  const order = buildOrder(2, 2);
+  validator.validateOrder(order);
+  delete order.items[1].price.currency;
+  let thrownErr = null;
+  let res;
+  try {
+    res = await makeScalapayReqAndHandleRes(order);
+  }
+  catch(error) {
+    thrownErr = error;
+  }
+  expect(res.errors.items).not.toBeUndefined();
+  expect(res.errors.items[0].field).toBe("price.currency");
+  expect(res.errors.items[0].itemIndex).toBe(1);
+});
+
+*/

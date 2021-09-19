@@ -32,7 +32,7 @@ const requiredItemPurchaseInfo = [
   {name: 'price', fields:
    [{name: 'amount', isValid: (val) => {return val >= 0}, 
     parse: (val) => {return val.toString()}},
-  {name: 'currency'}]
+    {name: 'currency', isValid: (code) => {return code.length === 3}}]
   },
   {name: 'name'},
   {name: 'category'},
@@ -71,7 +71,7 @@ const validateOrder = (order) => {
   if(!order) {
     return {
       valid: false,
-      errors: [{field: 'order', code: ErrMsgNoOrder, msg: "No order"}]
+      errors: [{field: 'order', code: ErrMsgNoOrder, messages: ["No order"]}]
     }
   }
   // Check the toplevel items in the order
@@ -81,7 +81,8 @@ const validateOrder = (order) => {
 
   // If there were no items, add this as an error
   if(!order.items || order.items.length === 0) {
-    userAndShippingErrors.push({field: 'items', code: ErrMsgNoItems, msg: "Order contains no items"});
+    userAndShippingErrors.push(
+      {field: 'items', code: ErrMsgNoItems, messages: ["Order contains no items"]});
   }
 
   // Build the returned error object
@@ -113,12 +114,21 @@ const checkPurchaseItemsInformation = (order) => {
     return errors;
   }
 
+  // Store the order currency to compare against the item price.currency fields
+  const orderCurrency = order.totalAmount ? order.totalAmount.currency.toLowerCase() : '';
+
   // Iterate through all the items in the order, and in an inner loop
   // check each of their fields for validation against the required fields
   for(let i = 0; i < items.length; ++i) {
+    // Do the general object field validator
     let itemErrors = objectFieldValidator(items[i], requiredItemPurchaseInfo);
-    // If there are errors, add it to the error list with an additional field
-    // noting which item this is
+    // Check the item price currency matches the order totalAmount.currency
+    if(items[i].price &&
+       items[i].price.currency.toLowerCase() !== orderCurrency) {
+         itemErrors.push({field: 'price.currency', code: ErrMsgFieldInvalid, 
+         messages: ['Item price currency must match the order total amount currency']})
+       }
+    // If there are errors, add it to the error list with this item's index
     if(itemErrors.length !== 0) {
       errors.push({itemIndex: i, errors: itemErrors});
     }
@@ -148,7 +158,7 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
   requiredFields.forEach(fieldObj => {
     // Check the object contains a value for this field object
     if(!objectToValidate[fieldObj.name]) {
-      errors.push({field: fieldObj.name, code: ErrMsgMissingField, msg: "Required"})
+      errors.push({field: fieldObj.name, code: ErrMsgMissingField, messages: ["Required"]})
       return;
     }
     // Get a convenience reference to the object to validate
@@ -157,7 +167,7 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
     // continue the loop
     if(!fieldObj.fields) {
       if(!isValid(fieldObj, objectRef)) {
-        errors.push({field: fieldObj.name, code: ErrMsgFieldInvalid, msg: "Invalid"})
+        errors.push({field: fieldObj.name, code: ErrMsgFieldInvalid, messages: ["Invalid"]})
       }
       // Make sure it's parsed properly
       else {
@@ -173,13 +183,13 @@ const objectFieldValidator = (objectToValidate, requiredFields) => {
       // If the order doesn't contain the required child field, add and error and continue
       if(!objectRefChildVal) {
         errors.push({field: fieldObj.name + "." + childField.name,
-         code: ErrMsgMissingField, msg: "Required"})
+         code: ErrMsgMissingField, messages: ["Required"]})
         return;
       }
       // Check the chield field's validity
       if(!isValid(childField, objectRefChildVal)) {
         errors.push({field: fieldObj.name + "." + childField.name, 
-        code: ErrMsgFieldInvalid, msg: "Invalid"})
+        code: ErrMsgFieldInvalid, messages: ["Invalid"]})
         return;
       }
       // Make sure it's parsed properly

@@ -99,3 +99,13 @@ test('Invalid order: Item quantity, and sku invalid', () => {
   expect(itemErrors[0].errors[1].field).toBe('sku');
   expect(itemErrors[0].errors[1].code).toBe(validator.ErrMsgFieldInvalid);
 });
+
+test('Invalid order: Item currency does not match total order currency', () => {
+  const order = buildOrder(1, 1);
+  order.items[0].price.currency = "AUD";
+  const res = validator.validateOrder(order);
+  expect(res.valid).toBe(false);
+  const itemErrors = res.errors.items;
+  expect(itemErrors.length).toBe(1);
+  expect(itemErrors[0].errors[0].field).toBe('price.currency');
+})

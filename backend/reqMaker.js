@@ -5,8 +5,49 @@ const makeScalapayReqAndHandleRes = async (order) => {
   const res = await makeScalapayReq(order);
   if(res.message && res.message.errors) {
     handleScalapayAndThisValidityDisagreement(order, res);
+    let errors = convertScalapayErrorIntoLocalScheme(res.message.errors);
+    return {
+      errors: errors
+    }
   }
-  return res;
+  else {
+    return res;
+  }
+}
+
+/*
+  Converts the Scalapay order error format into our error format
+  for return to the frontend.
+  Parse replace the 'field' array and replace with dot separated property selector
+*/
+const convertScalapayErrorIntoLocalScheme = (scalaErrs) => {
+  let userAndShippingErrors = [];
+  let itemErrors = [];
+  scalaErrs.forEach(err=> {
+    const topField = err.field[0];
+    // If this is an item, create a new item error
+    if(topField === "items") {
+      const newItemErr = {
+        itemIndex: err.field[1],
+        // convert the array to dot notated property field
+        field: err.field.slice(2).join("."),
+        messages: err.messages
+      }
+      itemErrors.push(newItemErr);
+    }
+    else {
+      const newUserAndShippingError = {
+        field: err.field.join("."),
+        messages: err.messages
+      }
+      userAndShippingErrors.push(newUserAndShippingError)
+    }
+  });
+  const errors = {
+    userAndShipping: userAndShippingErrors,
+    items: itemErrors
+  }
+  return errors;
 }
 
 /*
@@ -15,12 +56,12 @@ const makeScalapayReqAndHandleRes = async (order) => {
   We track these occurances in ValidationErrors.json 
   to figure out what is wrong in our validation.
 */
-const handleScalapayAndThisValidityDisagreement = (order, sclpayRes) => {
+const handleScalapayAndThisValidityDisagreement = (order, scalaPayRes) => {
   const errFileJson = JSON.parse(fs.readFileSync('./ValidationErrors.json'));
   const errObj = {
     date: new Date(),
     order: order,
-    scalaResponse: sclpayRes
+    scalaResponse: scalaPayRes
   }
   errFileJson.push(errObj);
   fs.writeFileSync('./ValidationErrors.json', JSON.stringify(errFileJson));
